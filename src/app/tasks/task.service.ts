@@ -14,8 +14,15 @@ export class TaskService {
     }
   ]);
 
+  private readonly createdSignal = signal<number>(1); // Initial task counts as created
+  private readonly deletedSignal = signal<number>(0);
+  private readonly completedSignal = signal<number>(0);
+
   readonly tasks = this.tasksSignal.asReadonly();
   readonly remaining = computed(() => this.tasksSignal().filter(task => !task.completed).length);
+  readonly created = this.createdSignal.asReadonly();
+  readonly deleted = this.deletedSignal.asReadonly();
+  readonly completed = this.completedSignal.asReadonly();
 
   getTask(id: string): Task | undefined {
     return this.tasksSignal().find(task => task.id === id);
@@ -30,6 +37,7 @@ export class TaskService {
     };
 
     this.tasksSignal.update(tasks => [...tasks, nextTask]);
+    this.createdSignal.update(count => count + 1);
   }
 
   updateTask(updated: Task): void {
@@ -40,13 +48,22 @@ export class TaskService {
 
   removeTask(id: string): void {
     this.tasksSignal.update(tasks => tasks.filter(task => task.id !== id));
+    this.deletedSignal.update(count => count + 1);
   }
 
   toggleCompletion(id: string): void {
     this.tasksSignal.update(tasks =>
-      tasks.map(task =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
+      tasks.map(task => {
+        if (task.id === id) {
+          const wasCompleted = task.completed;
+          const updatedTask = { ...task, completed: !task.completed };
+          if (!wasCompleted && updatedTask.completed) {
+            this.completedSignal.update(count => count + 1);
+          }
+          return updatedTask;
+        }
+        return task;
+      })
     );
   }
 }
