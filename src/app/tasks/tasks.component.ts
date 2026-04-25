@@ -22,6 +22,9 @@ import { Task } from './task.model';
           <strong>{{ remaining() }}</strong>
           <span>tarefas pendentes</span>
         </div>
+        @if (tasks().length > 0) {
+          <a routerLink="/stats" class="stats-btn">Ver Estatísticas</a>
+        }
       </header>
 
       <div class="tasks-grid">
@@ -77,6 +80,21 @@ import { Task } from './task.model';
         display: block;
         font-size: 2rem;
         margin-bottom: 0.25rem;
+      }
+
+      .stats-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: #4f46e5;
+        color: white;
+        text-decoration: none;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        align-self: flex-start;
+      }
+
+      .stats-btn:hover {
+        background: #4338ca;
       }
 
       .tasks-grid {
